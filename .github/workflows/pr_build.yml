@@ -22,6 +22,8 @@ jobs:
           server-id: central
           server-username: ${{ secrets.MAVEN_USERNAME }}
           server-password: ${{ secrets.MAVEN_PASSWORD }}
+          gpg-passphrase: MAVEN_GPG_PASSPHRASE
+          gpg-private-key: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
 
       - name: Maven Build
         run: mvn -B clean install -Prelease
