@@ -1,0 +1,28 @@
+changelog:
+  exclude:
+    labels:
+      - ignored
+  categories:
+    - title: 🚨 Breaking Changes
+      labels:
+        - breaking
+    - title: ✨ New Features / Improvements
+      labels:
+        - feature
+        - improvement
+    - title: 🪳 Bug Fixes
+      labels:
+        - bugfix
+    - title: 📦 Dependency Updates
+      labels:
+        - dependency
+    - title: 📝 Documentation
+      labels:
+        - documentation
+    - title: 🧹 Tech debt
+      labels:
+        - tech-debt
+        - chore
+    - title: Other Changes
+      labels:
+        - misc
