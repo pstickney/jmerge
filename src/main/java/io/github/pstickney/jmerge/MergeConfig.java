@@ -3,6 +3,7 @@ package io.github.pstickney.jmerge;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -10,14 +11,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MergeConfig {
 
+    @Builder.Default
     private Boolean prettyPrint = Boolean.FALSE;
-    private Strategy arrayStrategy = Strategy.MERGE;
+    @Builder.Default
+    private Strategy arrayStrategy = Strategy.APPEND;
+    @Builder.Default
     private Strategy objectStrategy = Strategy.MERGE;
     private final List<MergeRule> rules = new ArrayList<>();
 
