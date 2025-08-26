@@ -123,7 +123,7 @@ public abstract class Merger {
                 }
             }
         } else {
-            throw new StrategyException(String.format("Invalid strategy '%s' for object merge at %s", strategy, path));
+            throw new StrategyException(String.format("Invalid strategy '%s' for object merge at path '%s'", strategy, path.isEmpty() ? "." : path));
         }
 
         return result;
@@ -166,7 +166,7 @@ public abstract class Merger {
                     }
                 }
             } else {
-                throw new StrategyException(String.format("Missing rule for '%s' strategy at %s", strategy, path));
+                throw new StrategyException(String.format("Missing rule for '%s' strategy at path '%s'", strategy, path.isEmpty() ? "." : path));
             }
         }
 
