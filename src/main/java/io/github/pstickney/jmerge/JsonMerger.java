@@ -11,8 +11,21 @@ public class JsonMerger extends Merger {
 
     protected ObjectMapper mapper;
 
+    /**
+     * Constructs a Merger with the default merge configuration.
+     */
     public JsonMerger() {
         super();
+        mapper = new ObjectMapper();
+    }
+
+    /**
+     * Constructs a Merger with the specified merge configuration.
+     *
+     * @param config the merge configuration to apply during merging
+     */
+    public JsonMerger(MergeConfig config) {
+        super(config);
         mapper = new ObjectMapper();
     }
 
@@ -31,7 +44,7 @@ public class JsonMerger extends Merger {
 
         JsonNode node = merge(baseNode, overlayNode);
 
-        ObjectWriter writer = config.prettyPrint() ? mapper.writerWithDefaultPrettyPrinter() : mapper.writer();
+        ObjectWriter writer = config.getPrettyPrint() ? mapper.writerWithDefaultPrettyPrinter() : mapper.writer();
         return writer.writeValueAsString(node);
     }
 
