@@ -104,7 +104,7 @@ public abstract class Merger {
      */
     private ObjectNode mergeObjects(String path, ObjectNode base, ObjectNode overlay, MergeRule rule) {
         ObjectNode result = getObjectNode();
-        Strategy strategy = rule != null ? rule.getStrategy() : config.objectStrategy();
+        Strategy strategy = rule != null ? rule.getStrategy() : config.getObjectStrategy();
 
         if (strategy == Strategy.REPLACE) {
             result = overlay.deepCopy();
@@ -141,7 +141,7 @@ public abstract class Merger {
      */
     private ArrayNode mergeArrays(String path, ArrayNode base, ArrayNode overlay, MergeRule rule) {
         ArrayNode result = getArrayNode();
-        Strategy strategy = rule != null ? rule.getStrategy() : config.arrayStrategy();
+        Strategy strategy = rule != null ? rule.getStrategy() : config.getArrayStrategy();
 
         if (strategy == Strategy.REPLACE) {
             result = overlay.deepCopy();

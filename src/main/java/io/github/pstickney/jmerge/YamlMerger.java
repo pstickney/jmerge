@@ -11,8 +11,21 @@ public class YamlMerger extends Merger {
 
     protected YAMLMapper mapper;
 
+    /**
+     * Constructs a Merger with the default merge configuration.
+     */
     public YamlMerger() {
         super();
+        mapper = new YAMLMapper();
+    }
+
+    /**
+     * Constructs a Merger with the specified merge configuration.
+     *
+     * @param config the merge configuration to apply during merging
+     */
+    public YamlMerger(MergeConfig config) {
+        super(config);
         mapper = new YAMLMapper();
     }
 
@@ -31,7 +44,7 @@ public class YamlMerger extends Merger {
 
         JsonNode node = merge(baseNode, overlayNode);
 
-        ObjectWriter writer = config.prettyPrint() ? mapper.writerWithDefaultPrettyPrinter() : mapper.writer();
+        ObjectWriter writer = config.getPrettyPrint() ? mapper.writerWithDefaultPrettyPrinter() : mapper.writer();
         return writer.writeValueAsString(node);
     }
 
