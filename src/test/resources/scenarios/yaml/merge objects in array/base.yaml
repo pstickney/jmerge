@@ -1,0 +1,7 @@
+list:
+  - name: a
+    value: 50
+    keep: 1234
+  - name: b
+    value: 50
+    keep: 4567

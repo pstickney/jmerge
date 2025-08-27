@@ -1,0 +1,6 @@
+prettyPrint: true
+arrayStrategy: MERGE
+rules:
+  - path: list
+    keyField: name
+    strategy: MERGE
