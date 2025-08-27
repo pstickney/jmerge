@@ -1,0 +1,8 @@
+prettyPrint: true
+arrayStrategy: MERGE
+rules:
+  - path: list
+    keyField: name
+    strategy: MERGE
+  - path: list.value
+    strategy: REPLACE
