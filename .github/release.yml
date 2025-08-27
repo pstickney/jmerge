@@ -19,6 +19,9 @@ changelog:
     - title: 📝 Documentation
       labels:
         - documentation
+    - title: 🧪 Testing
+      labels:
+        - testing
     - title: 🧹 Tech debt
       labels:
         - tech-debt
