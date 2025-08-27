@@ -1,2 +1,2 @@
 prettyPrint: true
-objectStrategy: "REPLACE"
+objectStrategy: REPLACE
