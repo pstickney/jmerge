@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 
 public class YamlMerger extends Merger {
@@ -17,6 +18,9 @@ public class YamlMerger extends Merger {
     public YamlMerger() {
         super();
         mapper = new YAMLMapper();
+        mapper.enable(YAMLGenerator.Feature.INDENT_ARRAYS_WITH_INDICATOR)
+            .enable(YAMLGenerator.Feature.MINIMIZE_QUOTES)
+            .enable(YAMLGenerator.Feature.ALWAYS_QUOTE_NUMBERS_AS_STRINGS);
     }
 
     /**
@@ -27,6 +31,9 @@ public class YamlMerger extends Merger {
     public YamlMerger(MergeConfig config) {
         super(config);
         mapper = new YAMLMapper();
+        mapper.enable(YAMLGenerator.Feature.INDENT_ARRAYS_WITH_INDICATOR)
+            .enable(YAMLGenerator.Feature.MINIMIZE_QUOTES)
+            .enable(YAMLGenerator.Feature.ALWAYS_QUOTE_NUMBERS_AS_STRINGS);
     }
 
     /**
@@ -46,6 +53,26 @@ public class YamlMerger extends Merger {
 
         ObjectWriter writer = config.getPrettyPrint() ? mapper.writerWithDefaultPrettyPrinter() : mapper.writer();
         return writer.writeValueAsString(node);
+    }
+
+    /**
+     * Merges two objects of type T according to the configured strategies.
+     *
+     * @param base        the base object
+     * @param overlay     the overlay object
+     * @param outputClass the class of the object
+     * @param <T>
+     * @return the merged object
+     * @throws JsonProcessingException if parsing or processing fails
+     */
+    @Override
+    public <T> T merge(T base, T overlay, Class<T> outputClass) throws JsonProcessingException {
+        String baseString = mapper.writeValueAsString(base);
+        String overlayString = mapper.writeValueAsString(overlay);
+
+        String merged = merge(baseString, overlayString);
+
+        return mapper.readValue(merged, outputClass);
     }
 
     /**

@@ -5,10 +5,11 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.github.pstickney.jmerge.exception.StrategyException;
+import io.github.pstickney.jmerge.util.MergerUtil;
 
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * The core merging engine responsible for merging JSON/YAML structures based on configurable strategies.
@@ -44,6 +45,18 @@ public abstract class Merger {
      * @throws JsonProcessingException if parsing or processing fails
      */
     public abstract String merge(String base, String overlay) throws JsonProcessingException;
+
+    /**
+     * Merges two objects of type T according to the configured strategies.
+     *
+     * @param base        the base object
+     * @param overlay     the overlay object
+     * @param outputClass the class of the object
+     * @param <T>
+     * @return the merged object
+     * @throws JsonProcessingException if parsing or processing fails
+     */
+    public abstract <T> T merge(T base, T overlay, Class<T> outputClass) throws JsonProcessingException;
 
     /**
      * Provides a new empty ObjectNode instance specific to the JSON/YAML implementation.
@@ -110,16 +123,29 @@ public abstract class Merger {
             result = overlay.deepCopy();
         } else if (strategy == Strategy.MERGE) {
             result = base.deepCopy();
-            for (Iterator<String> it = overlay.fieldNames(); it.hasNext(); ) {
-                String field = it.next();
+            Set<String> fields = MergerUtil.combineIterators(base.fieldNames(), overlay.fieldNames());
+
+            for (String field : fields) {
                 JsonNode baseVal = result.get(field);
                 JsonNode overlayVal = overlay.get(field);
                 String childPath = path.isEmpty() ? field : path + "." + field;
+                MergeRule childRule = config.findRule(childPath);
+                Strategy childStrategy = childRule != null ? childRule.getStrategy() : config.getObjectStrategy();
 
-                if (baseVal != null) {
-                    result.set(field, mergeNodes(childPath, baseVal, overlayVal));
-                } else {
+                if (baseVal != null && overlayVal != null) { // Both exist
+                    if (childStrategy == Strategy.REPLACE) {
+                        result.set(field, overlayVal.deepCopy());
+                    } else if (childStrategy == Strategy.MERGE) {
+                        result.set(field, mergeNodes(childPath, baseVal, overlayVal));
+                    }
+                } else if (baseVal == null && overlayVal != null) { // field added
                     result.set(field, overlayVal.deepCopy());
+                } else if (baseVal != null && overlayVal == null) { // field removed
+                    if (childStrategy == Strategy.REPLACE) {
+                        result.remove(field);
+                    } else if (childStrategy == Strategy.MERGE) {
+                        result.set(field, baseVal.deepCopy());
+                    }
                 }
             }
         } else {
@@ -149,24 +175,30 @@ public abstract class Merger {
             result.addAll(base);
             result.addAll(overlay);
         } else if (strategy == Strategy.MERGE) {
-            if (rule != null && rule.getKeyField() != null) {
-                Map<String, JsonNode> baseMap = new LinkedHashMap<>();
-                for (JsonNode item : base) {
-                    String key = getNestedValue(item, rule.getKeyField());
-                    if (key != null)
-                        baseMap.put(key, item);
+            if (rule == null)
+                throw new StrategyException(String.format("Missing array merge rule for '%s'", path));
+
+            if (rule.getKeyField() == null)
+                throw new StrategyException(String.format("Missing keyField in array merge rule for '%s'", path));
+
+            // Build up baseMap based on rule keyField
+            Map<String, JsonNode> baseMap = new LinkedHashMap<>();
+            for (JsonNode item : base) {
+                String key = getNestedValue(item, rule.getKeyField());
+                if (key != null)
+                    baseMap.put(key, item);
+            }
+
+            // Add array element to result only if it exists in overlay
+            // So elements that only exist in base will get removed in the result
+            for (JsonNode item : overlay) {
+                String key = getNestedValue(item, rule.getKeyField());
+                if (key != null && baseMap.containsKey(key)) {
+                    result.add(mergeNodes(path, baseMap.get(key), item));
+                    baseMap.remove(key);
+                } else {
+                    result.add(item.deepCopy());
                 }
-                for (JsonNode item : overlay) {
-                    String key = getNestedValue(item, rule.getKeyField());
-                    if (key != null && baseMap.containsKey(key)) {
-                        result.add(mergeNodes(path, baseMap.get(key), item));
-                        baseMap.remove(key);
-                    } else {
-                        result.add(item.deepCopy());
-                    }
-                }
-            } else {
-                throw new StrategyException(String.format("Missing rule for '%s' strategy at path '%s'", strategy, path.isEmpty() ? "." : path));
             }
         }
 
