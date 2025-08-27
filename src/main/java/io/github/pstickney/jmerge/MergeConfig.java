@@ -24,10 +24,11 @@ public class MergeConfig {
     private Strategy arrayStrategy = Strategy.APPEND;
     @Builder.Default
     private Strategy objectStrategy = Strategy.MERGE;
-    private final List<MergeRule> rules = new ArrayList<>();
+    @Builder.Default
+    private List<MergeRule> rules = new ArrayList<>();
 
     /**
-     * Adds a merge rule with the default MERGE strategy for the specified path and key field.
+     * Adds a rule with the default MERGE strategy for the specified path and key field.
      *
      * @param path     the JSON path for which the rule applies
      * @param keyField the key field used to key on when doing merges
@@ -38,7 +39,18 @@ public class MergeConfig {
     }
 
     /**
-     * Adds a merge rule with a custom strategy for the specified path and key field.
+     * Adds a rule with a custom strategy for the specified path.
+     *
+     * @param path     the JSON path for which the rule applies
+     * @param strategy the strategy to apply for this rule
+     * @return the updated MergeConfig instance
+     */
+    public MergeConfig addRule(String path, Strategy strategy) {
+        return addRule(path, null, strategy);
+    }
+
+    /**
+     * Adds a rule with a custom strategy for the specified path and key field.
      *
      * @param path     the JSON path for which the rule applies
      * @param keyField the key field used to key on when doing merges

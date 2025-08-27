@@ -49,6 +49,26 @@ public class JsonMerger extends Merger {
     }
 
     /**
+     * Merges two objects of type T according to the configured strategies.
+     *
+     * @param base        the base object
+     * @param overlay     the overlay object
+     * @param outputClass the class of the object
+     * @param <T>
+     * @return the merged object
+     * @throws JsonProcessingException if parsing or processing fails
+     */
+    @Override
+    public <T> T merge(T base, T overlay, Class<T> outputClass) throws JsonProcessingException {
+        String baseString = mapper.writeValueAsString(base);
+        String overlayString = mapper.writeValueAsString(overlay);
+
+        String merged = merge(baseString, overlayString);
+
+        return mapper.readValue(merged, outputClass);
+    }
+
+    /**
      * Provides a new Jackson {@link ObjectNode} instance for representing JSON objects.
      *
      * @return a new {@link ObjectNode}
