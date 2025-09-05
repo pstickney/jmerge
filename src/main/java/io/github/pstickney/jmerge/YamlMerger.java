@@ -8,6 +8,8 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 
+import java.util.function.Consumer;
+
 public class YamlMerger extends Merger {
 
     protected YAMLMapper mapper;
@@ -16,11 +18,7 @@ public class YamlMerger extends Merger {
      * Constructs a Merger with the default merge configuration.
      */
     public YamlMerger() {
-        super();
-        mapper = new YAMLMapper();
-        mapper.enable(YAMLGenerator.Feature.INDENT_ARRAYS_WITH_INDICATOR)
-            .enable(YAMLGenerator.Feature.MINIMIZE_QUOTES)
-            .enable(YAMLGenerator.Feature.ALWAYS_QUOTE_NUMBERS_AS_STRINGS);
+        this(new MergeConfig());
     }
 
     /**
@@ -29,11 +27,36 @@ public class YamlMerger extends Merger {
      * @param config the merge configuration to apply during merging
      */
     public YamlMerger(MergeConfig config) {
+        this(config, mapper -> {
+        });
+    }
+
+    /**
+     * Constructs a Merger with the specified merge configuration and mapper customizer.
+     *
+     * @param config     the merge configuration to apply during merging
+     * @param customizer the consumer to customize the mapper
+     */
+    public YamlMerger(MergeConfig config, Consumer<YAMLMapper> customizer) {
         super(config);
         mapper = new YAMLMapper();
+
+        // set defaults
         mapper.enable(YAMLGenerator.Feature.INDENT_ARRAYS_WITH_INDICATOR)
             .enable(YAMLGenerator.Feature.MINIMIZE_QUOTES)
             .enable(YAMLGenerator.Feature.ALWAYS_QUOTE_NUMBERS_AS_STRINGS);
+
+        // apply overrides
+        customizeMapper(customizer);
+    }
+
+    /**
+     * Customize the mapper associated with this Merger
+     *
+     * @param customizer the consumer to customize the mapper
+     */
+    public void customizeMapper(Consumer<YAMLMapper> customizer) {
+        customizer.accept(mapper);
     }
 
     /**
