@@ -2,7 +2,7 @@
 
 **JMerge** is a small Java library for merging JSON and YAML documents with flexible strategies.
 
-It currently supports:
+Supported strategies:
 * Object merging
   * `MERGE` - merge the objects (default)
   * `REPLACE` - replace the object
@@ -154,6 +154,32 @@ public class Example {
 
 // Output - we can see id:1 was dropped, id:2 was merged, id:3 was added
 // {"a":1,"b":[{"id":2,"x":1,"y":2},{"id":3,"z":4}],"c":4}
+```
+
+Customize Mapper Example
+```java
+public class Example {
+    public static void main(String[] args) {
+        String base = String.format("[{\"id\":1,\"time\":\"%s\"}]", Instant.now().minus(1, ChronoUnit.MINUTES));
+        String overlay = String.format("[{\"id\":1},{\"id\":2,\"time\":\"%s\"}]", Instant.now().plus(1, ChronoUnit.MINUTES));
+
+        try {
+            // Create custom config that merges root array elements on key "id"
+            MergeConfig config = MergeConfig.builder().build()
+                .addRule("", "id");
+
+            // Create a merger with the custom config and custom mapper config
+            JsonMerger merger = new JsonMerger(config, mapper ->
+                mapper.registerModule(new JavaTimeModule()));
+            String result = merger.merge(base, overlay);
+            System.out.println(result);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+}
+// Output
+// [{"id":1,"time":"2025-09-05T12:01:00.00Z"},{"id":2,"time":"2025-09-05T12:03:0.000Z"}]
 ```
 
 ## Testing
