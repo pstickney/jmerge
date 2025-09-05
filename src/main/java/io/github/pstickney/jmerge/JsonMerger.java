@@ -7,6 +7,8 @@ import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import java.util.function.Consumer;
+
 public class JsonMerger extends Merger {
 
     protected ObjectMapper mapper;
@@ -15,8 +17,7 @@ public class JsonMerger extends Merger {
      * Constructs a Merger with the default merge configuration.
      */
     public JsonMerger() {
-        super();
-        mapper = new ObjectMapper();
+        this(new MergeConfig());
     }
 
     /**
@@ -25,8 +26,31 @@ public class JsonMerger extends Merger {
      * @param config the merge configuration to apply during merging
      */
     public JsonMerger(MergeConfig config) {
+        this(config, mapper -> {
+        });
+    }
+
+    /**
+     * Constructs a Merger with the specified merge configuration and mapper customizer.
+     *
+     * @param config     the merge configuration to apply during merging
+     * @param customizer the consumer to customize the mapper
+     */
+    public JsonMerger(MergeConfig config, Consumer<ObjectMapper> customizer) {
         super(config);
         mapper = new ObjectMapper();
+
+        // apply overrides
+        customizeMapper(customizer);
+    }
+
+    /**
+     * Customize the mapper associated with this Merger
+     *
+     * @param customizer the consumer to customize the mapper
+     */
+    public void customizeMapper(Consumer<ObjectMapper> customizer) {
+        customizer.accept(mapper);
     }
 
     /**
